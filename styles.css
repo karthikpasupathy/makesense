@@ -1,0 +1,262 @@
+/* Container for the summary widget */
+#yt-summary-widget {
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  color: #0f0f0f;
+  font-size: 14px;
+  line-height: 1.6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  /* Ensure z-index works */
+  z-index: 2200;
+  /* Higher than YouTube header */
+}
+
+/* Dark mode support */
+html[dark] #yt-summary-widget {
+  background-color: #0f0f0f;
+  border-color: #3f3f3f;
+  color: #f1f1f1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Header section with icons */
+.yts-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+html[dark] .yts-header {
+  border-bottom-color: #3f3f3f;
+}
+
+.yts-icon-btn {
+  background: #f9f9f9;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #606060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+html[dark] .yts-icon-btn {
+  background: #272727;
+  color: #aaa;
+}
+
+.yts-icon-btn:hover {
+  background-color: #f0f0f0;
+  color: #0f0f0f;
+}
+
+html[dark] .yts-icon-btn:hover {
+  background-color: #3f3f3f;
+  color: #fff;
+}
+
+/* Ensure clicks pass through icons to the button */
+.yts-btn svg,
+.yts-icon-btn svg {
+  pointer-events: none;
+}
+
+.yts-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #0f0f0f;
+}
+
+html[dark] .yts-title {
+  color: #f1f1f1;
+}
+
+/* Content area */
+.yts-content {
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-bottom: 16px;
+}
+
+/* Highlighted chips style for bold text - REMOVED background */
+.yts-content strong,
+.yts-content b {
+  font-weight: 700;
+  color: inherit;
+}
+
+html[dark] .yts-content strong,
+html[dark] .yts-content b {
+  color: inherit;
+}
+
+/* Headings in summary */
+.yts-content h3,
+.yts-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  color: #0f0f0f;
+}
+
+html[dark] .yts-content h3,
+html[dark] .yts-content h4 {
+  color: #f1f1f1;
+}
+
+/* Lists */
+.yts-content ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.yts-content li {
+  margin-bottom: 4px;
+}
+
+/* Scrollbar styling */
+.yts-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.yts-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yts-content::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+/* Main Action Button */
+.yts-btn {
+  background-color: #ff5722;
+  /* Orange color from screenshot */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.yts-btn:hover {
+  background-color: #f4511e;
+}
+
+.yts-btn:disabled {
+  background-color: #ffccbc;
+  cursor: not-allowed;
+}
+
+/* Input field for API Key */
+.yts-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: transparent;
+  color: inherit;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.yts-error {
+  color: #d32f2f;
+  font-size: 13px;
+  margin-top: 8px;
+  background-color: #ffebee;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+html[dark] .yts-error {
+  background-color: #3e2723;
+  color: #ffcdd2;
+}
+
+/* Loading state */
+#yts-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #666;
+}
+
+.yts-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #ff5722;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+html[dark] .yts-spinner {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: #ff5722;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* Brand Header */
+.yts-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yts-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.yts-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ff5722; /* Brand orange */
+}
+
+html[dark] .yts-brand-name {
+  color: #ff5722;
+}
+
