@@ -12,6 +12,7 @@ Create a `secrets.js` file in the root directory with your OpenRouter API key an
 // secrets.js
 const OPENROUTER_API_KEY = 'your-openrouter-api-key-here';
 const OPENROUTER_MODEL = 'anthropic/claude-3.5-haiku';
+const INSTANTDB_APP_ID = 'your-instantdb-app-id-here';
 ```
 
 **Get your OpenRouter API key:** [https://openrouter.ai/keys](https://openrouter.ai/keys)

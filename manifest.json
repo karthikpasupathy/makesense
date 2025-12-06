@@ -4,8 +4,8 @@
     "version": "1.0",
     "description": "Summarize YouTube videos using OpenRouter AI models.",
     "icons": {
-        "16": "icon.png",
-        "48": "icon.png",
+        "16": "icon16.png",
+        "48": "icon48.png",
         "128": "icon.png"
     },
     "permissions": [
@@ -37,7 +37,12 @@
         "service_worker": "background.js"
     },
     "action": {
-        "default_title": "View Summary History"
+        "default_title": "View Summary History",
+        "default_icon": {
+            "16": "icon16.png",
+            "48": "icon48.png",
+            "128": "icon.png"
+        }
     },
     "web_accessible_resources": [
         {
