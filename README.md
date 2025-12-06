@@ -2,7 +2,7 @@
 
 A Chrome extension that summarizes YouTube videos using AI models via OpenRouter. It stores your summary history securely using InstantDB.
 
-![Widget](/screens/makesense-widget.png)
+![Widget](/screens/makesense%20-%20widget.png)
 
 
 ## Features
