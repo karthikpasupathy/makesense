@@ -12,6 +12,9 @@ function createWidget() {
         <span class="yts-brand-name">Makesense</span>
       </div>
       <div style="flex-grow: 1;"></div>
+      <button id="yts-history-btn" class="yts-icon-btn" title="View History">
+        <svg height="20" viewBox="0 0 24 24" width="20" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      </button>
       <button id="yts-regenerate-btn" class="yts-icon-btn" title="Regenerate Summary" style="display: none;">
         <svg height="20" viewBox="0 0 24 24" width="20" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
       </button>
@@ -80,11 +83,13 @@ function setupEventListeners() {
     const saveKeyBtn = document.getElementById('yts-save-key-btn');
     const copyBtn = document.getElementById('yts-copy-btn');
     const regenerateBtn = document.getElementById('yts-regenerate-btn');
+    const historyBtn = document.getElementById('yts-history-btn');
 
     summarizeBtn.addEventListener('click', handleSummarize);
     saveKeyBtn.addEventListener('click', handleSaveKey);
     copyBtn.addEventListener('click', handleCopy);
     regenerateBtn.addEventListener('click', handleSummarize); // Regenerate just calls summarize again
+    historyBtn.addEventListener('click', handleHistory);
 }
 
 async function handleSummarize() {
@@ -133,6 +138,11 @@ function handleCopy() {
         btn.style.color = '#4caf50'; // Green
         setTimeout(() => btn.style.color = originalColor, 2000);
     });
+}
+
+function handleHistory() {
+    // Open history page in new tab
+    chrome.runtime.sendMessage({ action: 'openHistory' });
 }
 
 // Helpers
@@ -186,7 +196,59 @@ function showSummary(text) {
     document.getElementById('yts-copy-btn').style.display = 'block';
     document.getElementById('yts-regenerate-btn').style.display = 'block';
     document.getElementById('yts-summarize-btn').style.display = 'none'; // Hide button after summary
+
+    // Save to InstantDB
+    saveSummaryToInstantDB(text);
 }
+
+// Save summary to InstantDB via background script (to avoid CORS issues)
+async function saveSummaryToInstantDB(summary) {
+    try {
+        console.log('Attempting to save summary to InstantDB...');
+
+        if (typeof INSTANTDB_APP_ID === 'undefined' || !INSTANTDB_APP_ID || INSTANTDB_APP_ID === 'your-instantdb-app-id-here') {
+            console.warn('InstantDB App ID not configured. Skipping save.');
+            return;
+        }
+
+        // Get video metadata
+        const videoId = getVideoId();
+        const videoTitle = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent || 'Unknown Title';
+        const videoUrl = window.location.href;
+        const thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+
+        const summaryData = {
+            videoId,
+            videoTitle,
+            videoUrl,
+            thumbnailUrl,
+            summary,
+            createdAt: Date.now(),
+            model: OPENROUTER_MODEL || 'unknown'
+        };
+
+        console.log('Saving summary via background script...');
+        console.log('Summary data:', summaryData);
+
+        // Send to background script to avoid CORS issues
+        const response = await chrome.runtime.sendMessage({
+            action: 'saveSummary',
+            data: summaryData
+        });
+
+        if (response.success) {
+            console.log('✅ Summary saved to InstantDB successfully!');
+            console.log('Result:', response.result);
+        } else {
+            throw new Error(response.error);
+        }
+    } catch (error) {
+        console.error('❌ Error saving to InstantDB:', error);
+        console.error('Error details:', error.message, error.stack);
+    }
+}
+
+// Load InstantDB SDK is no longer needed - we use dynamic import
 
 function parseMarkdown(text) {
     let html = text;

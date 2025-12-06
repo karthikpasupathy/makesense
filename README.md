@@ -37,24 +37,44 @@ OpenRouter gives you access to many AI models. Edit `OPENROUTER_MODEL` in `secre
 
 See all models at: [https://openrouter.ai/models](https://openrouter.ai/models)
 
-### 3. Install the Extension
+### 3. InstantDB Setup (Optional - for Summary History)
+
+To save and view your summary history:
+
+1. Create a free account at [https://instantdb.com](https://instantdb.com)
+2. Create a new app and copy your App ID
+3. Add it to `secrets.js`:
+```javascript
+const INSTANTDB_APP_ID = 'your-app-id-here';
+```
+
+See [INSTANTDB_SETUP.md](INSTANTDB_SETUP.md) for detailed instructions.
+
+### 4. Install the Extension
 
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable "Developer mode" in the top right
 3. Click "Load unpacked"
 4. Select the `makesense` directory
 
-### 4. Usage
+### 5. Usage
 
+**Summarizing Videos:**
 1. Navigate to any YouTube video
 2. The Makesense widget will appear in the right sidebar
 3. Click "Summarize Video" to generate a summary
 4. You can copy or regenerate the summary as needed
 
+**Viewing History:**
+1. Click the Makesense extension icon in your browser toolbar
+2. View all your saved summaries in a beautiful grid layout
+3. Click on any summary to watch the video or view the full summary
+
 ## Features
 
 - **Flexible Model Selection**: Use any model from OpenRouter - from free to premium
 - **Smart Summaries**: Adapts summary structure based on video type
+- **Summary History**: Save and view all your summaries in a beautiful interface (with InstantDB)
 - **Extended Support**: Handles videos up to ~100,000 characters of transcript
 - **Complete Summaries**: Generates up to 4096 tokens to avoid truncation
 - **Cost Effective**: Switch between models based on your budget
@@ -68,5 +88,6 @@ See all models at: [https://openrouter.ai/models](https://openrouter.ai/models)
 ## Privacy
 
 - Your API key is stored locally in your browser
+- Summaries are stored in your personal InstantDB instance (optional)
 - Requests go directly to OpenRouter (no third-party servers)
 - The extension only activates on YouTube video pages

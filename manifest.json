@@ -15,7 +15,8 @@
     ],
     "host_permissions": [
         "https://www.youtube.com/*",
-        "https://openrouter.ai/*"
+        "https://openrouter.ai/*",
+        "https://api.instantdb.com/*"
     ],
     "content_scripts": [
         {
@@ -36,7 +37,7 @@
         "service_worker": "background.js"
     },
     "action": {
-        "default_title": "Makesense"
+        "default_title": "View Summary History"
     },
     "web_accessible_resources": [
         {
