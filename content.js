@@ -75,6 +75,10 @@ async function injectWidget() {
     secondaryColumn.insertBefore(widget, secondaryColumn.firstChild);
 
     setupEventListeners();
+
+    // Check if there's an existing summary for this video
+    checkForExistingSummary();
+
     isInjecting = false;
 }
 
@@ -112,6 +116,45 @@ async function handleSummarize() {
     } finally {
         stopLoading();
     }
+}
+
+// Check for existing summary and display it if found
+async function checkForExistingSummary() {
+    try {
+        const videoId = getVideoId();
+        if (!videoId) return;
+
+        console.log('Checking for existing summary for videoId:', videoId);
+
+        const response = await chrome.runtime.sendMessage({
+            action: 'getSummaryByVideoId',
+            videoId: videoId
+        });
+
+        if (response && response.success && response.summary) {
+            console.log('Found existing summary, displaying it');
+            displayExistingSummary(response.summary.summary);
+        } else {
+            console.log('No existing summary found for this video');
+        }
+    } catch (error) {
+        console.error('Error checking for existing summary:', error);
+    }
+}
+
+// Display an existing summary (without saving to DB again)
+function displayExistingSummary(text) {
+    const summaryDiv = document.getElementById('yts-summary-text');
+
+    // Better Markdown parsing
+    const formattedText = parseMarkdown(text);
+
+    summaryDiv.innerHTML = formattedText;
+    summaryDiv.style.display = 'block';
+    document.getElementById('yts-copy-btn').style.display = 'block';
+    document.getElementById('yts-regenerate-btn').style.display = 'block';
+    document.getElementById('yts-summarize-btn').style.display = 'none'; // Hide button since summary exists
+    document.getElementById('yts-loading').style.display = 'none';
 }
 
 async function handleSaveKey() {

@@ -98,19 +98,50 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // Required for async sendResponse
     }
 
+    // Handle get summary by video ID request
+    if (request.action === 'getSummaryByVideoId') {
+        handleGetSummaryByVideoId(request.videoId)
+            .then(summary => {
+                console.log('Get summary by videoId successful:', summary ? 'found' : 'not found');
+                sendResponse({ success: true, summary });
+            })
+            .catch(error => {
+                console.error('Get summary by videoId failed:', error);
+                sendResponse({ success: false, error: error.message });
+            });
+        return true; // Required for async sendResponse
+    }
+
     return false;
 });
 
-// Save summary to InstantDB using SDK
+// Save summary to InstantDB using SDK (upsert by videoId)
 async function handleSaveSummary(summaryData) {
     const database = initializeDB();
     if (!database) {
         throw new Error('Database not initialized');
     }
 
-    const result = await database.transact(
-        database.tx.summaries[id()].update(summaryData)
-    );
+    // Check if a summary already exists for this video ID
+    const existingSummary = await handleGetSummaryByVideoId(summaryData.videoId);
+
+    let result;
+    if (existingSummary) {
+        // Update existing summary
+        console.log('Updating existing summary for videoId:', summaryData.videoId);
+        result = await database.transact(
+            database.tx.summaries[existingSummary.id].update({
+                ...summaryData,
+                updatedAt: Date.now()
+            })
+        );
+    } else {
+        // Create new summary
+        console.log('Creating new summary for videoId:', summaryData.videoId);
+        result = await database.transact(
+            database.tx.summaries[id()].update(summaryData)
+        );
+    }
 
     return result;
 }
@@ -164,4 +195,44 @@ async function handleDeleteSummary(summaryId) {
     );
 
     return result;
+}
+
+// Get summary by video ID
+async function handleGetSummaryByVideoId(videoId) {
+    const database = initializeDB();
+    if (!database) {
+        throw new Error('Database not initialized');
+    }
+
+    return new Promise((resolve, reject) => {
+        let resolved = false;
+
+        const unsubscribe = database.subscribeQuery({ summaries: {} }, (resp) => {
+            if (resolved) return;
+
+            if (resp.error) {
+                resolved = true;
+                unsubscribe();
+                reject(resp.error);
+                return;
+            }
+
+            resolved = true;
+            unsubscribe();
+
+            // Find the summary with matching videoId
+            const summaries = resp.data.summaries || [];
+            const matchingSummary = summaries.find(s => s.videoId === videoId);
+            resolve(matchingSummary || null);
+        });
+
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                unsubscribe();
+                reject(new Error('Query timed out'));
+            }
+        }, 10000);
+    });
 }
