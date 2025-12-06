@@ -31,7 +31,7 @@ function createWidget() {
       </div>
 
       <div id="yts-api-input-container" style="display: none; margin-top: 10px;">
-        <input type="password" id="yts-api-key" class="yts-input" placeholder="Enter Anthropic API Key">
+        <input type="password" id="yts-api-key" class="yts-input" placeholder="Enter OpenRouter API Key">
         <button id="yts-save-key-btn" class="yts-btn" style="background-color: #065fd4;">Save Key</button>
         <p class="yts-error" id="yts-key-error" style="display: none;"></p>
       </div>
@@ -47,24 +47,32 @@ function createWidget() {
     return container;
 }
 
+let isInjecting = false;
+
 async function injectWidget() {
     const videoId = getVideoId();
-    if (!videoId || videoId === currentVideoId) return;
+    if (!videoId || videoId === currentVideoId || isInjecting) return;
 
-    // Remove existing widget if any
-    const existingWidget = document.getElementById('yt-summary-widget');
-    if (existingWidget) existingWidget.remove();
+    isInjecting = true;
+
+    // Remove ALL existing widgets (in case of duplicates)
+    const existingWidgets = document.querySelectorAll('#yt-summary-widget');
+    existingWidgets.forEach(widget => widget.remove());
 
     currentVideoId = videoId;
 
     // Wait for the secondary column to appear
     const secondaryColumn = await waitForElement('#secondary');
-    if (!secondaryColumn) return;
+    if (!secondaryColumn) {
+        isInjecting = false;
+        return;
+    }
 
     const widget = createWidget();
     secondaryColumn.insertBefore(widget, secondaryColumn.firstChild);
 
     setupEventListeners();
+    isInjecting = false;
 }
 
 function setupEventListeners() {
@@ -110,7 +118,7 @@ async function handleSaveKey() {
         return;
     }
 
-    await chrome.storage.local.set({ 'anthropic_api_key': key });
+    await chrome.storage.local.set({ 'openrouter_api_key': key });
 
     document.getElementById('yts-api-input-container').style.display = 'none';
     handleSummarize(); // Retry summarization
@@ -150,9 +158,9 @@ function waitForElement(selector) {
 
 function getApiKey() {
     return new Promise(resolve => {
-        chrome.storage.local.get(['anthropic_api_key'], result => {
-            // Return stored key or the hardcoded one provided by user
-            resolve(result.anthropic_api_key || 'PASTE_API_KEY_HERE');
+        chrome.storage.local.get(['openrouter_api_key'], result => {
+            // Return stored key or the one from secrets.js
+            resolve(result.openrouter_api_key || OPENROUTER_API_KEY);
         });
     });
 }
@@ -183,10 +191,10 @@ function showSummary(text) {
 function parseMarkdown(text) {
     let html = text;
 
-    // Headers (e.g., ### Header) -> Map all to h3/h4 for smaller size
-    html = html.replace(/^### (.*$)/gim, '<h4>$1</h4>');
-    html = html.replace(/^## (.*$)/gim, '<h4>$1</h4>');
-    html = html.replace(/^# (.*$)/gim, '<h3>$1</h3>');
+    // Headers (e.g., ### Header) -> Increase sizes: ### -> h3, ## -> h3, # -> h2
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^# (.*$)/gim, '<h2>$1</h2>');
 
     // Bold (**text**)
     html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
@@ -222,14 +230,30 @@ function parseMarkdown(text) {
 
     html = newLines.join('\n');
 
-    // Paragraphs / Newlines
+    // Convert double newlines to paragraph breaks, single newlines to <br>
+    html = html.replace(/\n\n+/g, '</p><p>');
     html = html.replace(/\n/g, '<br>');
 
-    // Cleanup <br> after block elements
-    html = html.replace(/<\/h3><br>/g, '</h3>');
-    html = html.replace(/<\/h4><br>/g, '</h4>');
-    html = html.replace(/<\/ul><br>/g, '</ul>');
-    html = html.replace(/<\/li><br>/g, '</li>');
+    // Wrap in paragraph tags
+    html = '<p>' + html + '</p>';
+
+    // Cleanup: Remove <p> tags around block elements
+    html = html.replace(/<p>(<h[23]>)/g, '$1');
+    html = html.replace(/(<\/h[23]>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<ul>)/g, '$1');
+    html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+
+    // Remove empty paragraphs
+    html = html.replace(/<p><\/p>/g, '');
+    html = html.replace(/<p>\s*<\/p>/g, '');
+
+    // Cleanup <br> before and after block elements
+    html = html.replace(/<br>\s*(<h[23]>)/g, '$1');
+    html = html.replace(/(<\/h[23]>)\s*<br>/g, '$1');
+    html = html.replace(/<br>\s*(<ul>)/g, '$1');
+    html = html.replace(/(<\/ul>)\s*<br>/g, '$1');
+    html = html.replace(/<br>\s*(<\/p>)/g, '$1');
+    html = html.replace(/(<p>)\s*<br>/g, '$1');
 
     return html;
 }

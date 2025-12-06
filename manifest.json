@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Makesense",
     "version": "1.0",
-    "description": "Summarize YouTube videos locally using Anthropic Claude.",
+    "description": "Summarize YouTube videos using OpenRouter AI models.",
     "icons": {
         "16": "icon.png",
         "48": "icon.png",
@@ -15,7 +15,7 @@
     ],
     "host_permissions": [
         "https://www.youtube.com/*",
-        "https://api.anthropic.com/*"
+        "https://openrouter.ai/*"
     ],
     "content_scripts": [
         {
@@ -23,6 +23,7 @@
                 "https://www.youtube.com/*"
             ],
             "js": [
+                "secrets.js",
                 "utils.js",
                 "content.js"
             ],

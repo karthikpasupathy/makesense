@@ -139,19 +139,19 @@ Summary Tips:
 * Prioritize clarity and engagement, using structured formatting to make the summary accessible and appealing to a broad audience.
 
 Transcript:
-${text.substring(0, 30000)}`;
+${text.substring(0, 100000)}`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': window.location.origin,
+            'X-Title': 'Makesense YouTube Summarizer'
         },
         body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1000,
+            model: OPENROUTER_MODEL,
+            max_tokens: 4096,
             messages: [
                 { role: 'user', content: prompt }
             ]
@@ -164,7 +164,7 @@ ${text.substring(0, 30000)}`;
     }
 
     const data = await response.json();
-    return data.content[0].text;
+    return data.choices[0].message.content;
 }
 
 /**

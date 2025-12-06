@@ -1,0 +1,19 @@
+# Secrets and API keys
+secrets.js
+
+# Node modules
+node_modules/
+
+# Build files
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
