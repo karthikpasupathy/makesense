@@ -14,7 +14,7 @@
 
 ## Step 3: Update Your secrets.js
 
-Open `d:\Qoder\makesense\secrets.js` and add your InstantDB App ID:
+Open `secrets.js` in the project root and add your InstantDB App ID:
 
 ```javascript
 // InstantDB Configuration
