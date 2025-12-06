@@ -2,6 +2,9 @@
 
 A Chrome extension that summarizes YouTube videos using AI models via OpenRouter. It stores your summary history securely using InstantDB.
 
+![Widget](/screens/makesense%20-%20widget.png)
+
+
 ## Features
 
 - **Flexible Model Selection**: Use any model from OpenRouter - from free to premium.
@@ -10,6 +13,8 @@ A Chrome extension that summarizes YouTube videos using AI models via OpenRouter
 - **Extended Support**: Handles videos up to ~100,000 characters of transcript.
 - **Complete Summaries**: Generates up to 4096 tokens to avoid truncation.
 - **Privacy Focused**: Your API keys are stored locally.
+
+![History](/screens/makesense%20-%20history.png)
 
 ## Setup
 
