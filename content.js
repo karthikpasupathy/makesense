@@ -53,6 +53,11 @@ function createWidget() {
 let isInjecting = false;
 
 async function injectWidget() {
+    // Only show widget on video pages (URL must contain '/watch')
+    if (!location.href.includes('/watch')) {
+        return;
+    }
+
     const videoId = getVideoId();
     if (!videoId || videoId === currentVideoId || isInjecting) return;
 
@@ -386,6 +391,11 @@ new MutationObserver(() => {
         if (url.includes('/watch')) {
             currentVideoId = null; // Force re-injection
             injectWidget();
+        } else {
+            // Remove widget when navigating away from video page
+            const existingWidgets = document.querySelectorAll('#yt-summary-widget');
+            existingWidgets.forEach(widget => widget.remove());
+            currentVideoId = null;
         }
     }
 }).observe(document, { subtree: true, childList: true });
